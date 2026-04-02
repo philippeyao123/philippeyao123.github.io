@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reads — Philippe-Emmanuel Yao</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--gold:#C9A96E;--gold-light:#E8D5A8;--bg:#0C0C0E;--bg-card:#141417;--bg-card-hover:#1A1A1F;--text-primary:#F0EDE6;--text-secondary:#9B978E;--border:#2A2A2F}
+    *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text-primary);font-family:'DM Sans',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;line-height:1.6}
+    ::selection{background:var(--gold);color:var(--bg)}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+    a{color:var(--gold);text-decoration:none;transition:color .3s}a:hover{color:var(--gold-light)}
+
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 clamp(24px,5vw,80px);height:64px;display:flex;align-items:center;justify-content:space-between;transition:all .4s;border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(12,12,14,.93);backdrop-filter:blur(12px);border-bottom-color:var(--border)}
+    nav .logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:.05em;cursor:pointer}
+    nav .links{display:flex;gap:32px}
+    nav .links a{color:var(--text-secondary);font-size:12px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;transition:color .3s}nav .links a:hover{color:var(--gold)}
+    nav .links a.active{color:var(--gold)}
+
+    .fade-in{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}.fade-in.visible{opacity:1;transform:translateY(0)}
+
+    .page-header{padding:140px clamp(24px,8vw,140px) 80px;position:relative}
+    .page-header::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(201,169,110,.03) 1px,transparent 1px);background-size:32px 32px;opacity:.5}
+    .page-header-inner{position:relative;z-index:1}
+    .section-number{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:400;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:12px}
+    .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px}
+    .section-title .accent{color:var(--gold)}
+    .section-line{width:48px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin-top:20px;margin-bottom:24px}
+    .page-subtitle{font-size:16px;line-height:1.8;color:var(--text-secondary);max-width:600px;font-weight:300}
+
+    /* FILTER TABS */
+    .filters{padding:0 clamp(24px,8vw,140px) 48px;display:flex;gap:12px;flex-wrap:wrap}
+    .filter-btn{padding:8px 20px;border:1px solid var(--border);border-radius:2px;background:transparent;color:var(--text-secondary);font-size:12px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s}
+    .filter-btn:hover{border-color:rgba(201,169,110,.4);color:var(--gold)}
+    .filter-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600}
+
+    /* BOOK GRID */
+    .books-section{padding:0 clamp(24px,8vw,140px) 120px}
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+    .book-card{padding:28px 28px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;transition:background .3s,border-color .3s,transform .3s;display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .book-card:hover{background:var(--bg-card-hover);border-color:rgba(201,169,110,.2);transform:translateY(-3px)}
+    .book-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold);opacity:0;transition:opacity .3s}
+    .book-card:hover::before{opacity:1}
+    .book-category{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--gold);margin-bottom:12px;font-weight:500}
+    .book-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;line-height:1.3;margin-bottom:6px;color:var(--text-primary)}
+    .book-author{font-size:13px;color:var(--text-secondary);margin-bottom:14px;font-weight:400}
+    .book-note{font-size:13px;line-height:1.7;color:var(--text-secondary);font-weight:300;flex:1}
+    .book-tags{margin-top:16px;display:flex;flex-wrap:wrap;gap:6px}
+    .book-tag{font-size:10px;padding:3px 10px;border:1px solid rgba(201,169,110,.15);border-radius:2px;color:rgba(201,169,110,.7);text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+    .book-lang{position:absolute;top:16px;right:16px;font-size:10px;padding:3px 8px;border-radius:2px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+    .lang-fr{color:#7DAFCB;border:1px solid rgba(125,175,203,.2)}
+    .lang-en{color:var(--text-secondary);border:1px solid var(--border)}
+
+    .count-badge{font-size:13px;color:var(--text-secondary);margin-bottom:32px;font-weight:300}
+    .count-badge span{color:var(--gold);font-weight:500}
+
+    footer{padding:32px clamp(24px,8vw,140px);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--text-secondary);font-weight:300}
+    footer .subtle{color:rgba(155,151,142,.53);font-size:11px;letter-spacing:.05em}
+
+    @media(max-width:768px){
+      nav .links{gap:16px}nav .links a{font-size:10px;letter-spacing:.06em}
+      .books-grid{grid-template-columns:1fr}
+      .filters{gap:8px}
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar">
+    <a class="logo" href="index.html">YBPE</a>
+    <div class="links">
+      <a href="index.html">CV</a>
+      <a href="reads.html" class="active">Reads</a>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-inner fade-in">
+      <span class="section-number">Library</span>
+      <h1 class="section-title">Selected <span class="accent">Reads</span></h1>
+      <div class="section-line"></div>
+      <p class="page-subtitle">
+        A curated selection from my bookshelf. These are the books that shaped how I think about markets, risk, decision-making, and behavioural patterns.
+      </p>
+    </div>
+  </div>
+
+  <div class="filters fade-in" style="transition-delay:.1s">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="markets">Markets & Trading</button>
+    <button class="filter-btn" data-filter="risk">Risk & Probability</button>
+    <button class="filter-btn" data-filter="behaviour">Behavioural Science</button>
+    <button class="filter-btn" data-filter="economics">Economics & Policy</button>
+    <button class="filter-btn" data-filter="strategy">Strategy & Thinking</button>
+  </div>
+
+  <div class="books-section">
+    <p class="count-badge fade-in" style="transition-delay:.15s" id="bookCount"></p>
+    <div class="books-grid" id="booksGrid">
+
+      <!-- MARKETS & TRADING -->
+      <div class="book-card fade-in" data-category="markets">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Markets & Trading</span>
+        <h3 class="book-title">The Man Who Solved the Market</h3>
+        <p class="book-author">Gregory Zuckerman</p>
+        <p class="book-note">The story of Jim Simons and Renaissance Technologies. Essential reading for understanding how quantitative methods transformed finance, and why systematic approaches beat discretionary intuition at scale.</p>
+        <div class="book-tags"><span class="book-tag">Quant Finance</span><span class="book-tag">Systematic Trading</span><span class="book-tag">Renaissance</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="markets">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Markets & Trading</span>
+        <h3 class="book-title">Billion Dollar Whale</h3>
+        <p class="book-author">Tom Wright & Bradley Hope</p>
+        <p class="book-note">The 1MDB scandal and the anatomy of financial fraud at sovereign scale. A study in counterparty risk, regulatory failure, and how capital flows can be exploited through information asymmetry.</p>
+        <div class="book-tags"><span class="book-tag">Financial Crime</span><span class="book-tag">Sovereign Risk</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="markets">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Markets & Trading</span>
+        <h3 class="book-title">Blood and Oil</h3>
+        <p class="book-author">Bradley Hope & Justin Scheck</p>
+        <p class="book-note">Saudi Arabia's economic transformation under MBS. Relevant for understanding energy markets, sovereign wealth fund dynamics, and geopolitical risk in commodity pricing.</p>
+        <div class="book-tags"><span class="book-tag">Geopolitics</span><span class="book-tag">Energy</span><span class="book-tag">SWF</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="markets">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Markets & Trading</span>
+        <h3 class="book-title">The Psychology of Money</h3>
+        <p class="book-author">Morgan Housel</p>
+        <p class="book-note">Behavioural patterns in wealth accumulation and risk-taking. Useful for understanding how cognitive biases shape market participants and drive asset price dynamics.</p>
+        <div class="book-tags"><span class="book-tag">Behavioural Finance</span><span class="book-tag">Wealth</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="markets">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Markets & Trading</span>
+        <h3 class="book-title">The Old Money Book</h3>
+        <p class="book-author">Byron Tully</p>
+        <p class="book-note">Perspectives on long-term capital stewardship, wealth preservation, and the cultural dimensions of institutional and family capital allocation.</p>
+        <div class="book-tags"><span class="book-tag">Wealth Management</span><span class="book-tag">Capital Allocation</span></div>
+      </div>
+
+      <!-- RISK & PROBABILITY -->
+      <div class="book-card fade-in" data-category="risk">
+        <span class="book-lang lang-fr">FR</span>
+        <span class="book-category">Risk & Probability</span>
+        <h3 class="book-title">Le Cygne Noir</h3>
+        <p class="book-author">Nassim Nicholas Taleb</p>
+        <p class="book-note">The foundational text on tail risk and the limits of normal-distribution thinking. Directly applicable to EVT, fat-tailed modelling, and why VaR models systematically underestimate extreme events.</p>
+        <div class="book-tags"><span class="book-tag">Tail Risk</span><span class="book-tag">Fat Tails</span><span class="book-tag">Epistemology</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="risk">
+        <span class="book-lang lang-fr">FR</span>
+        <span class="book-category">Risk & Probability</span>
+        <h3 class="book-title">Antifragile</h3>
+        <p class="book-author">Nassim Nicholas Taleb</p>
+        <p class="book-note">Systems that gain from disorder. The concept maps directly onto convexity in option payoffs, barbell strategies, and why non-linear exposure management matters more than point estimates.</p>
+        <div class="book-tags"><span class="book-tag">Convexity</span><span class="book-tag">Non-linearity</span><span class="book-tag">Robustness</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="risk">
+        <span class="book-lang lang-fr">FR</span>
+        <span class="book-category">Risk & Probability</span>
+        <h3 class="book-title">Le Hasard Sauvage</h3>
+        <p class="book-author">Nassim Nicholas Taleb</p>
+        <p class="book-note">Fooled by Randomness in French. On distinguishing signal from noise, survivorship bias in trading performance, and the role of luck in financial markets. Core reading for anyone building backtesting frameworks.</p>
+        <div class="book-tags"><span class="book-tag">Randomness</span><span class="book-tag">Survivorship Bias</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="risk">
+        <span class="book-lang lang-fr">FR</span>
+        <span class="book-category">Risk & Probability</span>
+        <h3 class="book-title">Jouer sa Peau</h3>
+        <p class="book-author">Nassim Nicholas Taleb</p>
+        <p class="book-note">Skin in the Game. On principal-agent problems, incentive alignment, and why risk management only works when decision-makers bear the consequences of their models failing.</p>
+        <div class="book-tags"><span class="book-tag">Incentives</span><span class="book-tag">Agency</span><span class="book-tag">Model Risk</span></div>
+      </div>
+
+      <!-- BEHAVIOURAL SCIENCE -->
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-fr">FR</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">Psychologie des Foules</h3>
+        <p class="book-author">Gustave Le Bon</p>
+        <p class="book-note">The classic text on crowd psychology. Foundational for understanding herding behaviour in markets, momentum dynamics, and why rational individual agents produce irrational collective outcomes.</p>
+        <div class="book-tags"><span class="book-tag">Crowd Psychology</span><span class="book-tag">Herding</span><span class="book-tag">Market Dynamics</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">Nudge</h3>
+        <p class="book-author">Richard H. Thaler & Cass R. Sunstein</p>
+        <p class="book-note">Choice architecture and behavioural economics. Thaler's work on mental accounting and loss aversion has direct implications for understanding options market pricing and investor behaviour.</p>
+        <div class="book-tags"><span class="book-tag">Behavioural Economics</span><span class="book-tag">Decision Architecture</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">The Art of Thinking Clearly</h3>
+        <p class="book-author">Rolf Dobelli</p>
+        <p class="book-note">A systematic catalogue of cognitive biases. Useful as a checklist for model validation: confirmation bias in parameter selection, anchoring in calibration, and overconfidence in backtesting results.</p>
+        <div class="book-tags"><span class="book-tag">Cognitive Biases</span><span class="book-tag">Decision Making</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">What Every Body Is Saying</h3>
+        <p class="book-author">Joe Navarro</p>
+        <p class="book-note">Non-verbal communication and signal detection. Applicable to reading counterparties, client interactions, and the soft-skill dimension of trading floor dynamics.</p>
+        <div class="book-tags"><span class="book-tag">Communication</span><span class="book-tag">Signal Reading</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">Decisive</h3>
+        <p class="book-author">Chip & Dan Heath</p>
+        <p class="book-note">Frameworks for better decision-making under uncertainty. The WRAP model maps well onto structuring research processes and avoiding common pitfalls in quantitative analysis.</p>
+        <div class="book-tags"><span class="book-tag">Decision Frameworks</span><span class="book-tag">Uncertainty</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="behaviour">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Behavioural Science</span>
+        <h3 class="book-title">Surrounded by Idiots</h3>
+        <p class="book-author">Thomas Erikson</p>
+        <p class="book-note">Behavioural profiling and communication styles. Relevant for cross-functional collaboration, understanding stakeholder dynamics, and adapting communication in trading environments.</p>
+        <div class="book-tags"><span class="book-tag">Communication</span><span class="book-tag">Team Dynamics</span></div>
+      </div>
+
+      <!-- ECONOMICS & POLICY -->
+      <div class="book-card fade-in" data-category="economics">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Economics & Policy</span>
+        <h3 class="book-title">Narrative Economics</h3>
+        <p class="book-author">Robert J. Shiller</p>
+        <p class="book-note">How viral narratives drive economic events. Shiller's framework connects to sentiment analysis, NLP applications in finance, and understanding regime shifts driven by narrative contagion.</p>
+        <div class="book-tags"><span class="book-tag">Sentiment</span><span class="book-tag">NLP</span><span class="book-tag">Macro</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="economics">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Economics & Policy</span>
+        <h3 class="book-title">Nexus</h3>
+        <p class="book-author">Yuval Noah Harari</p>
+        <p class="book-note">On information networks, power structures, and how technology reshapes economic systems. Provides macro context for understanding systemic risk and network effects in financial markets.</p>
+        <div class="book-tags"><span class="book-tag">Information Networks</span><span class="book-tag">Systemic Risk</span></div>
+      </div>
+
+      <!-- STRATEGY & THINKING -->
+      <div class="book-card fade-in" data-category="strategy">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Strategy & Thinking</span>
+        <h3 class="book-title">The Concise 48 Laws of Power</h3>
+        <p class="book-author">Robert Greene & Joost Elffers</p>
+        <p class="book-note">Strategic thinking, positioning, and power dynamics. Applicable to navigating organisational structures, understanding market participants' incentives, and career strategy in competitive environments.</p>
+        <div class="book-tags"><span class="book-tag">Strategy</span><span class="book-tag">Power Dynamics</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="strategy">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Strategy & Thinking</span>
+        <h3 class="book-title">Meditations</h3>
+        <p class="book-author">Marcus Aurelius</p>
+        <p class="book-note">Stoic philosophy on emotional discipline, process over outcome, and equanimity under pressure. Directly relevant to maintaining composure during drawdowns and managing trading psychology.</p>
+        <div class="book-tags"><span class="book-tag">Stoicism</span><span class="book-tag">Discipline</span><span class="book-tag">Psychology</span></div>
+      </div>
+
+      <div class="book-card fade-in" data-category="strategy">
+        <span class="book-lang lang-en">EN</span>
+        <span class="book-category">Strategy & Thinking</span>
+        <h3 class="book-title">Atomic Habits</h3>
+        <p class="book-author">James Clear</p>
+        <p class="book-note">Systems thinking applied to performance optimisation. The compound effect of small improvements mirrors the edge-stacking mindset in systematic trading strategies.</p>
+        <div class="book-tags"><span class="book-tag">Systems Thinking</span><span class="book-tag">Performance</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span>© 2026 Yao Bathaix Philippe-Emmanuel</span>
+    <span class="subtle">London · Graduate Visa / Tier-2 Eligible</span>
+  </footer>
+
+  <script>
+    // Nav scroll
+    const nav=document.getElementById('navbar');
+    window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)},{passive:true});
+
+    // Fade-in
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1});
+    document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+    // Filter
+    const btns=document.querySelectorAll('.filter-btn');
+    const cards=document.querySelectorAll('.book-card');
+    const countEl=document.getElementById('bookCount');
+
+    function updateCount(n){countEl.innerHTML=`Showing <span>${n}</span> of ${cards.length} books`}
+    updateCount(cards.length);
+
+    btns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        btns.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const f=btn.dataset.filter;
+        let count=0;
+        cards.forEach(c=>{
+          const show=f==='all'||c.dataset.category===f;
+          c.style.display=show?'flex':'none';
+          if(show)count++;
+        });
+        updateCount(count);
+      });
+    });
+  </script>
+</body>
+</html>
