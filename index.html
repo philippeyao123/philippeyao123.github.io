@@ -77,6 +77,12 @@
     footer{padding:32px clamp(24px,8vw,140px);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--text-secondary);font-weight:300}
     footer .subtle{color:rgba(155,151,142,.53);font-size:11px;letter-spacing:.05em}
     @media(max-width:768px){.hero-inner{flex-direction:column-reverse;text-align:center}.hero-photo{width:180px;height:180px;margin-bottom:16px}.hero-buttons{justify-content:center}.hero .tagline{margin:0 auto}nav .links{gap:16px}nav .links a{font-size:10px;letter-spacing:.06em}.projects-grid{grid-template-columns:1fr}.skills-grid{grid-template-columns:1fr}.available-badge{display:none}.stats{justify-content:center}}
+  
+    /* Fallback: if JS fails, show content after animation would have completed */
+    @media screen {
+      .fade-in { animation: fallback-show 0s 1.5s forwards; }
+      @keyframes fallback-show { to { opacity:1; transform:translateY(0); } }
+    }
   </style>
 </head>
 <body>
@@ -181,7 +187,7 @@
     <div class="contact-links fade-in" style="transition-delay:.2s">
       <a href="https://www.linkedin.com/in/bathaix-philippe-emmanuel-yao-693a50167/" target="_blank" class="contact-link">LinkedIn &#8599;</a>
       <a href="https://github.com/philippeyao123/PERSONAL-PROJECTS" target="_blank" class="contact-link">GitHub &#8599;</a>
-      <a href="/cdn-cgi/l/email-protection#79001816091110151009091c1c141418170c1c155f5a4f4d421e14181015571a1614" class="contact-link">Email &#9993;</a>
+      <a href="mailto:yaophilippeemmanuel@gmail.com" class="contact-link">Email &#9993;</a>
     </div>
   </section>
 
@@ -190,7 +196,7 @@
     <span class="subtle">London &middot; Graduate Visa / Tier-2 Eligible</span>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     var nav=document.getElementById('navbar');
     window.addEventListener('scroll',function(){nav.classList.toggle('scrolled',window.scrollY>50)},{passive:true});
     var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');ob
